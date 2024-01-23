@@ -194,4 +194,5 @@ neus/*
 instant-nsr-pl/exp/*
 instant-nsr-pl/runs/*
 user_images/*.png
+user_data/*
 sam_pt/*
