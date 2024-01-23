@@ -28,7 +28,7 @@ def generate_mesh(master_id):
     "python", "launch.py",
     "--config", "configs/neuralangelo-ortho-wmask.yaml",
     "--gpu", "0",
-    "--train", "dataset.root_dir=../outputs/cropsize-192-cfg3.0/",
+    "--train", "dataset.root_dir=../outputs/cropsize-192-cfg1.0/",
     f"dataset.scene=pic{master_id}"
     ]
     subprocess.run(command, shell=True)
