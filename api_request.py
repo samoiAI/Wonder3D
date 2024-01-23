@@ -7,3 +7,4 @@ data = {'master_id': '123456'}
 response = requests.post(url, files=files, data=data)
 
 print(response.json())
+print("123")
