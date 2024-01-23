@@ -1,211 +1,53 @@
-**中文版本 [中文](README_zh.md)**
-# Wonder3D
-Single Image to 3D using Cross-Domain Diffusion
+# Wonder 3D
 
-**We have received numerous requests from non-professionals using Window who are eager to try out our project. 
-As a result, we have provided a Windows version and have included detailed setup instructions.**
+This is a windows installation tutoriol of wonder3D by Samoi AI.
 
-## Set Up Deep Learning Environment
+## Installation
 
-## Usage
-```bash
+### Requirements
+1. CUDA toolkit version = 11.8
+2. [Build Tools for Visual Studio 2022]( https://visualstudio.microsoft.com/zh-hant/downloads/ )
 
-# First clone the repo, and use the commands in the repo
+### Environment Variable
+1. Add the path below to your `Path` environment variable : ( Note that the path will slightly differ depending on your Microsoft Visual studio location. )
 
-import torch
-import requests
-from PIL import Image
-import numpy as np
-from torchvision.utils import make_grid, save_image
-from diffusers import DiffusionPipeline  # only tested on diffusers[torch]==0.19.3, may have conflicts with newer versions of diffusers
-
-def load_wonder3d_pipeline():
-
-    pipeline = DiffusionPipeline.from_pretrained(
-    'flamehaze1115/wonder3d-v1.0', # or use local checkpoint './ckpts'
-    custom_pipeline='flamehaze1115/wonder3d-pipeline',
-    torch_dtype=torch.float16
-    )
-
-    # enable xformers
-    pipeline.unet.enable_xformers_memory_efficient_attention()
-
-    if torch.cuda.is_available():
-        pipeline.to('cuda:0')
-    return pipeline
-
-pipeline = load_wonder3d_pipeline()
-
-# Download an example image.
-cond = Image.open(requests.get("https://d.skis.ltd/nrp/sample-data/lysol.png", stream=True).raw)
-
-# The object should be located in the center and resized to 80% of image height.
-cond = Image.fromarray(np.array(cond)[:, :, :3])
-
-# Run the pipeline!
-images = pipeline(cond, num_inference_steps=20, output_type='pt', guidance_scale=1.0).images
-
-result = make_grid(images, nrow=6, ncol=2, padding=0, value_range=(0, 1))
-
-save_image(result, 'result.png')
+```
+C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.38.33130\bin\Hostx64\x64
 ```
 
-## Set up Wonder3D
-1. Install Git.
+2. Make sure your `CUDA_PATH` points to v11_8
 
-If you do not have git installed, use ```conda install git``` to install git first.
+### Command Line
 
-The repo is still being under construction, thanks for your patience. 
-- [x] Local gradio demo.
-- [x] Detailed tutorial.
-- [x] GUI demo for mesh reconstruction
-- [x] Windows support
-- [x] Docker support
+Set up a fresh conda environment and input the commands below line by line : 
+```
+conda install python==3.10.0
+```
 
-## Schedule
-- [x] Inference code and pretrained models.
-- [x] Huggingface demo.
-- [ ] New model with higher resolution.
+1. Install torch and xformers by `pip` : 
 
+```
+pip install --upgrade torch torchvision torchaudio xformers --index-url https://download.pytorch.org/whl/cu118
+```
 
-### Preparation for inference
+2. Install other packages : 
 
-#### Linux System Setup.
-```angular2html
-conda create -n wonder3d
-conda activate wonder3d
-pip install -r requirements.txt
+```
+pip install fire diffusers==0.19.3 transformers bitsandbytes accelerate gradio rembg segment_anything
+```
+
+```
+pip install einops omegaconf pytorch-lightning==1.9.5 torch_efficient_distloss nerfacc==0.3.3 PyMCubes trimesh
+```
+
+3. Install `tiny-cuda-nn` : 
+
+```
 pip install git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
 ```
-#### Windows System Setup.
 
-Please switch to branch `main-windows` to see details of windows setup.
+4. If there are errors installing `tiny-cuda-nn`, use this command : ( Note that the path will slightly differ depending on your Microsoft Visual studio location. )
 
-#### Docker Setup
-see [docker/README.MD](docker/README.md)
-
-### Inference
-1. Optional. If you have troubles to connect to huggingface. Make sure you have downloaded the following models.
-Download the [checkpoints](https://connecthkuhk-my.sharepoint.com/:f:/g/personal/xxlong_connect_hku_hk/Ej7fMT1PwXtKvsELTvDuzuMBebQXEkmf2IwhSjBWtKAJiA) and into the root folder.
-
-If you are in mainland China, you may download via [aliyun](https://www.alipan.com/s/T4rLUNAVq6V).
-
-```bash
-Wonder3D
-|-- ckpts
-    |-- unet
-    |-- scheduler
-    |-- vae
-    ...
 ```
-Then modify the file ./configs/mvdiffusion-joint-ortho-6views.yaml, set `pretrained_model_name_or_path="./ckpts"`
-
-2. Download the [SAM](https://huggingface.co/spaces/abhishek/StableSAM/blob/main/sam_vit_h_4b8939.pth) model. Put it to the ``sam_pt`` folder.
-```
-Wonder3D
-|-- sam_pt
-    |-- sam_vit_h_4b8939.pth
-```
-3. Predict foreground mask as the alpha channel. We use [Clipdrop](https://clipdrop.co/remove-background) to segment the foreground object interactively. 
-You may also use `rembg` to remove the backgrounds.
-```bash
-# !pip install rembg
-import rembg
-result = rembg.remove(result)
-result.show()
-```
-4. Run Wonder3d to produce multiview-consistent normal maps and color images. Then you can check the results in the folder `./outputs`. (we use `rembg` to remove backgrounds of the results, but the segmentations are not always perfect. May consider using [Clipdrop](https://clipdrop.co/remove-background) to get masks for the generated normal maps and color images, since the quality of masks will significantly influence the reconstructed mesh quality.) 
-```bash
-accelerate launch --config_file 1gpu.yaml test_mvdiffusion_seq.py \
-            --config configs/mvdiffusion-joint-ortho-6views.yaml validation_dataset.root_dir={your_data_path} \
-            validation_dataset.filepaths=['your_img_file'] save_dir={your_save_path}
-```
-
-see example:
-
-```bash
-accelerate launch --config_file 1gpu.yaml test_mvdiffusion_seq.py \
-            --config configs/mvdiffusion-joint-ortho-6views.yaml validation_dataset.root_dir=./example_images \
-            validation_dataset.filepaths=['owl.png'] save_dir=./outputs
-```
-Enter the resulting address with your browser and play with the app. You can then download the results.
-
-#### Interactive inference: run your local gradio demo. (Only generate normals and colors without reconstruction)
-```bash
-python gradio_app_mv.py   # generate multi-view normals and colors
-```
-
-5. Mesh Extraction
-
-#### Instant-NSR Mesh Extraction
-
-* Generate mesh
-```bash
-cd ./instant-nsr-pl
-python launch.py --config configs/neuralangelo-ortho-wmask.yaml --gpu 0 --train dataset.root_dir=../{your_save_path}/cropsize-{crop_size}-cfg{guidance_scale:.1f}/ dataset.scene={scene}
-```
-
-see example:
-
-```bash
-cd ./instant-nsr-pl
-python launch.py --config configs/neuralangelo-ortho-wmask.yaml --gpu 0 --train dataset.root_dir=../outputs/cropsize-192-cfg1.0/ dataset.scene=owl
-```
-
-Our generated normals and color images are defined in orthographic views, so the reconstructed mesh is also in orthographic camera space. If you use MeshLab to view the meshes, you can click `Toggle Orthographic Camera` in `View` tab.
-
-#### Interactive inference: run your local gradio demo. (First generate normals and colors, and then do reconstructions. No need to perform gradio_app_mv.py first.)
-```bash
-python gradio_app_recon.py   
-```
-
-#### NeuS-based Mesh Extraction
-
-Reduce the num_workers in `instant-nsr-pl/datasets/ortho.py`
-```angular2html
-    def general_loader(self, dataset, batch_size):
-        sampler = None
-        return DataLoader(
-            dataset, 
-            num_workers=os.cpu_count(), # set it to a smaller one
-            batch_size=batch_size,
-            pin_memory=True,
-            sampler=sampler
-        )
-```
-
-## Common questions
-Q: Tips to get better results.
-1. Wonder3D is sensitive the facing direciton of input images. By experiments, front-facing images always lead to good reconstruction.
-2. Limited by resources, current implemetation only supports limited views (6 views) and low resolution (256x256). Any images will be first resized into 256x256 for generation, so images after such a downsample that still keep clear and sharp features will lead to good results.
-3. Images with occlusions will cause worse reconstructions, since 6 views cannot cover the complete object. Images with less occlsuions lead to better results.
-4. Increate optimization steps in instant-nsr-pl, modify `trainer.max_steps: 3000` in `instant-nsr-pl/configs/neuralangelo-ortho-wmask.yaml` to more steps like `trainer.max_steps: 10000`. Longer optimization leads to better texture.
-
-Q: The evelation and azimuth degrees of the generated views?
-
-A: Unlike that the prior works such as Zero123, SyncDreamer and One2345 adopt object world system, our views are defined in the camera system of the input image. The six views are in the plane with 0 elevation degree in the camera system of the input image. Therefore we don't need to estimate an elevation degree for input image. The azimuth degrees of the six views are 0, 45, 90, 180, -90, -45 respectively.
-
-Q: The focal length of the generated views?
-
-A: We assume the input images are captured by orthographic camera, so the generated views are also in orthographic space. This design enables our model to keep strong generlaization on unreal images, but sometimes it may suffer from focal lens distortions on real-captured images.
-## Acknowledgement
-We have intensively borrow codes from the following repositories. Many thanks to the authors for sharing their codes.
-- [stable diffusion](https://github.com/CompVis/stable-diffusion)
-- [zero123](https://github.com/cvlab-columbia/zero123)
-- [NeuS](https://github.com/Totoro97/NeuS)
-- [SyncDreamer](https://github.com/liuyuan-pal/SyncDreamer)
-- [instant-nsr-pl](https://github.com/bennyguo/instant-nsr-pl)
-
-## License
-Wonder3D is under [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.en.html), so any downstream solution and products (including cloud services) that include wonder3d code or a trained model (both pretrained or custom trained) inside it should be open-sourced to comply with the AGPL conditions. If you have any questions about the usage of Wonder3D, please contact us first.
-
-## Citation
-If you find this repository useful in your project, please cite the following work. :)
-```
-@article{long2023wonder3d,
-  title={Wonder3D: Single Image to 3D using Cross-Domain Diffusion},
-  author={Long, Xiaoxiao and Guo, Yuan-Chen and Lin, Cheng and Liu, Yuan and Dou, Zhiyang and Liu, Lingjie and Ma, Yuexin and Zhang, Song-Hai and Habermann, Marc and Theobalt, Christian and others},
-  journal={arXiv preprint arXiv:2310.15008},
-  year={2023}
-}
+"\Program Files\Microsoft Visual Studio\2022\community\vc\Auxiliary\Build\vcvars32.bat" x64
 ```
