@@ -5,6 +5,7 @@ from fastapi import FastAPI, File, UploadFile, Form
 import uvicorn
 from pydantic import BaseModel
 from rembg import remove
+import time
 
 
 class QAslot(BaseModel):
@@ -77,11 +78,14 @@ async def create_upload_file(
         file.file.close()
     
     try:
+        start_time =time.time()
         generate_mesh(master_id, image_id)
         move_obj_file(master_id, image_id)
+        end_time = time.time()
+        elapsed_time = end_time -start_time
     except Exception as e:
         return {"response": "There was an error generating mesh : " + str(e)}
-    return {"response": f"Task completed for user {master_id}"}
+    return {"response": f"Task completed for user {master_id}. It cost {elapsed_time} sec"}
 
 
 if __name__ == "__main__":
