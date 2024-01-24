@@ -6,6 +6,8 @@ sam_pt
 __pycache__/
 *.py[cod]
 *$py.class
+#triton
+triton-2.0.0-cp310-cp310-win_amd64.whl
 
 # C extensions
 *.so

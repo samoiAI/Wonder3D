@@ -51,3 +51,12 @@ pip install git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/to
 ```
 "\Program Files\Microsoft Visual Studio\2022\community\vc\Auxiliary\Build\vcvars32.bat" x64
 ```
+
+5. If running oｎ Windows, there may be an error about triton package, which is not available in pip of windows, but we can go to
+```
+https://huggingface.co/r4ziel/xformers_pre_built/blob/main/triton-2.0.0-cp310-cp310-win_amd64.whl
+```
+download the file, then run:
+```
+pip install triton-2.0.0-cp310-cp310-win_amd64.whl
+```
