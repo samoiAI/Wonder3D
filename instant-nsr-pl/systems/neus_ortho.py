@@ -77,20 +77,20 @@ class OrthoNeuSSystem(BaseSystem):
             rgb_mask = self.dataset.all_rgb_masks[index, y, x].view(-1).to(self.device)
             view_weights = self.dataset.view_weights[index, y, x].view(-1).to(self.device)
         else:
-            c2w = self.dataset.all_c2w[index][0]
+            c2w = self.dataset.all_c2w[index.to('cpu')][0]
             if self.dataset.directions.ndim == 3: # (H, W, 3)
                 directions = self.dataset.directions
                 origins = self.dataset.origins
             elif self.dataset.directions.ndim == 4: # (N, H, W, 3)
-                directions = self.dataset.directions[index][0] 
-                origins = self.dataset.origins[index][0]
+                directions = self.dataset.directions[index.to('cpu')][0] 
+                origins = self.dataset.origins[index.to('cpu')][0]
             rays_o, rays_d = get_ortho_rays(origins, directions, c2w)
             rays_o = rays_o.to(self.device)
             rays_d = rays_d.to(self.device)
-            rgb = self.dataset.all_images[index].view(-1, self.dataset.all_images.shape[-1]).to(self.device)
-            normal = self.dataset.all_normals_world[index].view(-1, self.dataset.all_images.shape[-1]).to(self.device)
-            fg_mask = self.dataset.all_fg_masks[index].view(-1).to(self.device)
-            rgb_mask = self.dataset.all_rgb_masks[index].view(-1).to(self.device)
+            rgb = self.dataset.all_images[index.to('cpu')].view(-1, self.dataset.all_images.shape[-1]).to(self.device)
+            normal = self.dataset.all_normals_world[index.to('cpu')].view(-1, self.dataset.all_images.shape[-1]).to(self.device)
+            fg_mask = self.dataset.all_fg_masks[index.to('cpu')].view(-1).to(self.device)
+            rgb_mask = self.dataset.all_rgb_masks[index.to('cpu')].view(-1).to(self.device)
             view_weights = None
 
         cosines = self.cos(rays_d, normal)

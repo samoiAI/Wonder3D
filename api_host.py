@@ -80,6 +80,7 @@ async def create_upload_file(
     try:
         start_time =time.time()
         generate_mesh(master_id, image_id)
+        # TODO: add HTTPException when generate_mesh fail
         move_obj_file(master_id, image_id)
         end_time = time.time()
         elapsed_time = end_time -start_time
