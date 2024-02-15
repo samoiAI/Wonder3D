@@ -15,8 +15,7 @@ class QAslot(BaseModel):
 from contextlib import asynccontextmanager
 app = FastAPI()
 
-
-def generate_mesh(master_id, image_id):
+def generate_multiview(master_id, image_id):
     command = [
     "accelerate", "launch",
     "--config_file", "1gpu.yaml",
@@ -24,15 +23,38 @@ def generate_mesh(master_id, image_id):
     "--config", "configs/mvdiffusion-joint-ortho-6views.yaml",
     f"validation_dataset.root_dir=./user_data/{master_id}",
     f"validation_dataset.filepaths=['pic-{image_id}.png']",
-    "save_dir=./outputs", "&&",
-    "cd", "./instant-nsr-pl", "&&",
-    "python", "launch.py",
-    "--config", "configs/neuralangelo-ortho-wmask.yaml",
-    "--gpu", "0",
-    "--train", "dataset.root_dir=../outputs/cropsize-192-cfg1.0/",
-    f"dataset.scene=pic-{image_id}"
+    "save_dir=./outputs"]
+    subprocess.run(command)
+
+# def generate_multiview(master_id, image_id):
+#     command = f"accelerate launch --config_file 1gpu.yaml test_mvdiffusion_seq.py --config configs/mvdiffusion-joint-ortho-6views.yaml validation_dataset.root_dir=./user_data/{master_id} validation_dataset.filepaths=['pic-{image_id}.png'] save_dir=./outputs"
+#     subprocess.run(command, shell=True)
+
+
+def generate_mesh(master_id, image_id):
+    command = [
+        "python", "launch.py",
+        "--config", "configs/neuralangelo-ortho-wmask.yaml",
+        "--gpu", "0",
+        "--train", f"dataset.root_dir=../outputs/cropsize-192-cfg1.0/",
+        f"dataset.scene=pic-{image_id}"
     ]
-    subprocess.run(command, shell=True)
+    subprocess.run(command, cwd="./instant-nsr-pl")
+
+# def generate_mesh(master_id, image_id):
+#     command = [
+#     "cd", "./instant-nsr-pl", "&&",
+#     "python", "launch.py",
+#     "--config", "configs/neuralangelo-ortho-wmask.yaml",
+#     "--gpu", "0",
+#     "--train", "dataset.root_dir=../outputs/cropsize-192-cfg1.0/",
+#     f"dataset.scene=pic-{image_id}"
+#     ]
+#     subprocess.run(command, shell=True)
+
+# Example usage:
+# generate_mesh("master_id", "image_id")
+
 
 def move_obj_file(master_id, image_id):
     import shutil
@@ -79,6 +101,8 @@ async def create_upload_file(
     
     try:
         start_time =time.time()
+        generate_multiview(master_id, image_id)
+        print("####################") # TODO: for test
         generate_mesh(master_id, image_id)
         # TODO: add HTTPException when generate_mesh fail
         move_obj_file(master_id, image_id)
