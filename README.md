@@ -6,9 +6,40 @@ This is a windows installation tutoriol of wonder3D by Samoi AI.
 
 ### Requirements
 1. CUDA toolkit version = 11.8
-2. [Build Tools for Visual Studio 2022]( https://visualstudio.microsoft.com/zh-hant/downloads/ )
+Set up a fresh conda environment and input the commands below line by line : 
+```
+conda install python==3.10.0
+```
 
-### Environment Variable
+1. Install torch and xformers by `pip` : 
+```
+pip install torch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 xformers==0.0.23.post1 --index-url https://download.pytorch.org/whl/cu118
+```
+
+2. Install other packages : 
+```
+pip install -r requirement.txt
+```
+
+3. Install `tiny-cuda-nn` : 
+```
+pip install git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
+```
+
+### check points
+Download check points:
+```
+https://connecthkuhk-my.sharepoint.com/:f:/g/personal/xxlong_connect_hku_hk/Ej7fMT1PwXtKvsELTvDuzuMBebQXEkmf2IwhSjBWtKAJiA
+```
+put this folder under Wonder3D/
+
+### SAM model
+Download the SAM model. Put it to the Wonder3D/sam_pt/ folder.
+```
+https://huggingface.co/spaces/abhishek/StableSAM/blob/main/sam_vit_h_4b8939.pth
+```
+
+# Windows
 1. Add the path below to your `Path` environment variable : ( Note that the path will slightly differ depending on your Microsoft Visual studio location. )
 
 ```
@@ -17,34 +48,7 @@ C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Tools\MSVC\14.
 
 2. Make sure your `CUDA_PATH` points to v11_8
 
-### Command Line
-
-Set up a fresh conda environment and input the commands below line by line : 
-```
-conda install python==3.10.0
-```
-
-1. Install torch and xformers by `pip` : 
-
-```
-pip install --upgrade torch torchvision torchaudio xformers --index-url https://download.pytorch.org/whl/cu118
-```
-
-2. Install other packages : 
-
-```
-pip install fire diffusers==0.19.3 transformers bitsandbytes accelerate gradio rembg segment_anything
-```
-
-```
-pip install einops omegaconf pytorch-lightning==1.9.5 torch_efficient_distloss nerfacc==0.3.3 PyMCubes trimesh
-```
-
-3. Install `tiny-cuda-nn` : 
-
-```
-pip install git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
-```
+3. [Build Tools for Visual Studio 2022]( https://visualstudio.microsoft.com/zh-hant/downloads/ )
 
 4. If there are errors installing `tiny-cuda-nn`, use this command : ( Note that the path will slightly differ depending on your Microsoft Visual studio location. )
 

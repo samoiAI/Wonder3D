@@ -92,7 +92,7 @@ async def create_upload_file(
         if not os.path.exists("user_data/" + master_id):
             os.makedirs("user_data/" + master_id)
         with open("user_data/" + master_id + "/pic-" + image_id + ".png", 'wb') as f:
-            f.write(remove(contents))
+            f.write(remove(contents)) # rembg before saving
 
     except Exception as e:
         return {"response": "There was an error uploading the file : " +  str(e)}
@@ -100,13 +100,13 @@ async def create_upload_file(
         file.file.close()
     
     try:
-        start_time =time.time()
+        start_time =time.perf_counter()
         generate_multiview(master_id, image_id)
-        print("####################") # TODO: for test
+        print("####################")
         generate_mesh(master_id, image_id)
         # TODO: add HTTPException when generate_mesh fail
         move_obj_file(master_id, image_id)
-        end_time = time.time()
+        end_time = time.perf_counter()
         elapsed_time = end_time -start_time
     except Exception as e:
         return {"response": "There was an error generating mesh : " + str(e)}
