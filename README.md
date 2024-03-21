@@ -39,7 +39,7 @@ Download the SAM model. Put it to the Wonder3D/sam_pt/ folder.
 https://huggingface.co/spaces/abhishek/StableSAM/blob/main/sam_vit_h_4b8939.pth
 ```
 
-# Windows
+## Windows
 1. Add the path below to your `Path` environment variable : ( Note that the path will slightly differ depending on your Microsoft Visual studio location. )
 
 ```
@@ -63,4 +63,11 @@ https://huggingface.co/r4ziel/xformers_pre_built/blob/main/triton-2.0.0-cp310-cp
 download the file, then run:
 ```
 pip install triton-2.0.0-cp310-cp310-win_amd64.whl
+```
+
+## useage
+### adjuect iterate steps
+under instant-nsr-pl/configs/neuralangelo-ortho-wmask.yaml, you can adjust the parameter:
+```
+max_steps:
 ```
